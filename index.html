@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WE DO WITHOUT TALKING | Home</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #ffffff;
+            --subtext-color: #a1a1aa;
+            --glass-bg: rgba(18, 18, 18, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --cloud-edge: radial-gradient(circle, rgba(10,10,10,0) 45%, rgba(10,10,10,1) 100%);
+            --logo-accent: #2c5282;
+            --btn-bg: #ffffff;
+            --btn-text: #000000;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f8fafc;
+            --text-color: #0f172a;
+            --subtext-color: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --glass-border: rgba(0, 0, 0, 0.12);
+            --cloud-edge: radial-gradient(circle, rgba(248,250,252,0) 45%, rgba(248,250,252,1) 100%);
+            --logo-accent: #1e3a8a;
+            --btn-bg: #0f172a;
+            --btn-text: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; transition: all 0.3s ease; }
+        body { background-color: var(--bg-color); color: var(--text-color); overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; }
+
+        nav {
+            position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 4%; z-index: 1000; background: var(--glass-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border);
+        }
+
+        .brand-logo-container { display: flex; align-items: center; gap: 12px; }
+        .brand-logo-text { display: flex; flex-direction: column; font-weight: 900; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; text-align: right; }
+        .brand-logo-symbol { height: 38px; width: auto; }
+
+        .nav-links { display: flex; gap: 2rem; list-style: none; font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+        .nav-links a:hover { color: var(--logo-accent); }
+
+        .hero { position: relative; width: 100%; height: 100vh; display: flex; justify-content: center; align-items: center; text-align: center; }
+        .hero-video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+        .cloudy-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; background: var(--cloud-edge); }
+        .hero-content { position: relative; z-index: 3; }
+        .hero-title { font-size: clamp(2.2rem, 6vw, 5rem); font-weight: 900; letter-spacing: 8px; text-transform: uppercase; }
+
+        .categories-section { padding: 6rem 4%; max-width: 1400px; margin: 0 auto; text-align: center; }
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .category-card { height: 420px; border-radius: 24px; overflow: hidden; position: relative; border: 1px solid var(--glass-border); background: var(--glass-bg); }
+        .category-card img { width: 100%; height: 100%; object-fit: cover; }
+        .category-overlay { position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem; background: linear-gradient(to top, rgba(0,0,0,0.85), transparent); }
+        .btn-link { display: inline-block; padding: 0.8rem 1.8rem; background: var(--btn-bg); color: var(--btn-text); border-radius: 12px; font-weight: 800; text-transform: uppercase; font-size: 0.8rem; margin-top: 1rem; }
+    </style>
+</head>
+<body data-theme="dark">
+
+    <nav>
+        <div class="brand-logo-container">
+            <div class="brand-logo-text"><span>WE DO</span><span>WITHOUT</span><span>TALKING</span></div>
+            <svg class="brand-logo-symbol" viewBox="0 0 100 100" fill="none">
+                <path d="M20 70 C30 40, 50 30, 70 30" stroke="var(--logo-accent)" stroke-width="8" stroke-linecap="round"/>
+                <path d="M10 50 C25 25, 60 20, 85 45 L65 30 M85 45 L70 65" stroke="var(--text-color)" stroke-width="8" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shoes Collection</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <video class="hero-video" autoplay loop muted playsinline preload="auto">
+            <source src="header-video.mp4" type="video/mp4">
+        </video>
+        <div class="cloudy-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">WE DO WITHOUT TALKING</h1>
+        </div>
+    </section>
+
+    <section class="categories-section">
+        <h2>Explore Collections</h2>
+        <div class="category-grid">
+            <div class="category-card">
+                <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80" alt="Men">
+                <div class="category-overlay">
+                    <h3>Men</h3>
+                    <a href="shop.html?category=men" class="btn-link">View Men's</a>
+                </div>
+            </div>
+            <div class="category-card">
+                <img src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80" alt="Women">
+                <div class="category-overlay">
+                    <h3>Women</h3>
+                    <a href="shop.html?category=women" class="btn-link">View Women's</a>
+                </div>
+            </div>
+            <div class="category-card">
+                <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80" alt="Unisex">
+                <div class="category-overlay">
+                    <h3>Unisex</h3>
+                    <a href="shop.html?category=unisex" class="btn-link">View Unisex</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>

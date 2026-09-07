@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WE DO WITHOUT TALKING | Shoes Collection</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #ffffff;
+            --subtext-color: #a1a1aa;
+            --glass-bg: rgba(18, 18, 18, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.12);
+            --logo-accent: #2c5282;
+            --btn-bg: #ffffff;
+            --btn-text: #000000;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; transition: background-color 0.3s ease, color 0.3s ease; }
+        body { background-color: var(--bg-color); color: var(--text-color); padding-top: 100px; overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; }
+
+        /* Navigation */
+        nav {
+            position: fixed; top: 0; width: 100%; display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 4%; z-index: 1000; background: var(--glass-bg); backdrop-filter: blur(20px); border-bottom: 1px solid var(--glass-border);
+        }
+
+        .brand-logo-container { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .brand-logo-text { display: flex; flex-direction: column; font-weight: 900; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; text-align: right; }
+        .brand-logo-symbol { height: 38px; width: auto; }
+
+        .nav-links { display: flex; gap: 2rem; list-style: none; font-size: 0.78rem; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; }
+        .nav-links a:hover { color: var(--logo-accent); }
+
+        /* Controls & Filter Bar */
+        .shop-section { padding: 2rem 4% 6rem; max-width: 1400px; margin: 0 auto; }
+        
+        .controls-bar { 
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem; 
+            margin-bottom: 3rem; background: var(--glass-bg); padding: 1.2rem 2rem; border-radius: 16px; border: 1px solid var(--glass-border); 
+        }
+
+        .filter-btn { 
+            background: transparent; border: 1px solid var(--glass-border); color: var(--text-color); 
+            padding: 0.6rem 1.4rem; border-radius: 20px; cursor: pointer; font-weight: 700; font-size: 0.75rem; 
+            letter-spacing: 1.5px; text-transform: uppercase; margin-right: 0.5rem; transition: all 0.3s ease;
+        }
+
+        .filter-btn.active, .filter-btn:hover { background: var(--btn-bg); color: var(--btn-text); }
+
+        .sort-dropdown { 
+            background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); color: var(--text-color); 
+            padding: 0.6rem 1.2rem; border-radius: 20px; font-weight: 700; font-size: 0.75rem; outline: none; cursor: pointer; 
+        }
+
+        /* Animated Grid & Products */
+        .products-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem;
+            opacity: 1; transform: translateY(0); transition: opacity 0.4s ease, transform 0.4s ease; 
+        }
+
+        .products-grid.grid-animating {
+            opacity: 0;
+            transform: translateY(20px) scale(0.98);
+        }
+
+        .product-card { 
+            background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 20px; 
+            overflow: hidden; cursor: pointer; backdrop-filter: blur(10px); transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+
+        .product-image-box { position: relative; height: 280px; overflow: hidden; background: #111; }
+        .product-image-box img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .product-card:hover .product-image-box img { transform: scale(1.08); }
+
+        .badge-bestseller {
+            position: absolute; top: 1rem; left: 1rem; background: var(--logo-accent); color: #fff;
+            padding: 0.3rem 0.8rem; font-size: 0.65rem; font-weight: 800; letter-spacing: 1.5px; border-radius: 12px; text-transform: uppercase;
+        }
+
+        .product-info { padding: 1.5rem; }
+        .product-category { font-size: 0.7rem; color: var(--subtext-color); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 0.3rem; }
+        .product-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.8rem; }
+        .product-price { font-size: 1.2rem; font-weight: 900; }
+
+        /* Modal Overlay & E-Commerce Vertical Thumbnails Layout */
+        .modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); 
+            backdrop-filter: blur(15px); z-index: 2000; display: flex; justify-content: center; align-items: center; 
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; 
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal-card { 
+            background: var(--glass-bg); border: 1px solid var(--glass-border); width: 92%; max-width: 980px; 
+            border-radius: 24px; padding: 2.5rem; display: grid; grid-template-columns: 100px 1fr 1fr; gap: 1.5rem; position: relative; 
+            max-height: 90vh; overflow-y: auto;
+        }
+
+        .modal-close { position: absolute; top: 1rem; right: 1.5rem; font-size: 2rem; cursor: pointer; color: var(--text-color); z-index: 10; }
+
+        .thumbnail-col { 
+            display: flex; flex-direction: column; gap: 0.8rem; 
+        }
+
+        .thumb-img { 
+            width: 100%; height: 75px; object-fit: cover; border-radius: 8px; cursor: pointer; opacity: 0.6; border: 2px solid transparent; transition: all 0.2s ease; background: #111;
+        }
+
+        .thumb-img.active, .thumb-img:hover { opacity: 1; border-color: var(--logo-accent); }
+
+        .main-modal-img { width: 100%; height: 420px; object-fit: cover; border-radius: 16px; background: #111; }
+
+        .size-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 1rem 0 1.5rem; }
+        .size-btn { padding: 0.6rem; border: 1px solid var(--glass-border); background: transparent; color: var(--text-color); border-radius: 8px; font-weight: 700; cursor: pointer; text-align: center; }
+        .size-btn:hover, .size-btn.active { background: var(--btn-bg); color: var(--btn-text); }
+
+        .pay-btn { 
+            background: var(--btn-bg); color: var(--btn-text); padding: 1rem 2rem; border: none; 
+            border-radius: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; width: 100%;
+        }
+
+        @media (max-width: 850px) {
+            .modal-card { grid-template-columns: 1fr; }
+            .thumbnail-col { flex-direction: row; order: 2; overflow-x: auto; }
+            .thumb-img { width: 70px; height: 70px; flex-shrink: 0; }
+            nav { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="brand-logo-container" onclick="window.location.href='index.html'">
+            <div class="brand-logo-text"><span>WE DO</span><span>WITHOUT</span><span>TALKING</span></div>
+            <svg class="brand-logo-symbol" viewBox="0 0 100 100" fill="none">
+                <path d="M20 70 C30 40, 50 30, 70 30" stroke="var(--logo-accent)" stroke-width="8" stroke-linecap="round"/>
+                <path d="M10 50 C25 25, 60 20, 85 45 L65 30 M85 45 L70 65" stroke="var(--text-color)" stroke-width="8" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shoes Collection</a></li>
+        </ul>
+    </nav>
+
+    <section class="shop-section">
+        <div class="controls-bar">
+            <div>
+                <button class="filter-btn active" onclick="filterCategory('all', this)">All (30)</button>
+                <button class="filter-btn" onclick="filterCategory('men', this)">Men (10)</button>
+                <button class="filter-btn" onclick="filterCategory('women', this)">Women (10)</button>
+                <button class="filter-btn" onclick="filterCategory('unisex', this)">Unisex (10)</button>
+            </div>
+
+            <select class="sort-dropdown" onchange="sortProducts(this.value)">
+                <option value="bestseller">Best Seller</option>
+                <option value="low-high">Price: Low to High</option>
+                <option value="high-low">Price: High to Low</option>
+            </select>
+        </div>
+
+        <div class="products-grid" id="productsGrid"></div>
+    </section>
+
+    <!-- Product Preview Modal -->
+    <div class="modal-overlay" id="productModal">
+        <div class="modal-card">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="thumbnail-col" id="modalThumbs"></div>
+            <div>
+                <img id="modalMainImg" class="main-modal-img" src="" alt="Shoes Angle View">
+            </div>
+            <div style="display: flex; flex-direction: column; justify-content: center;">
+                <h2 id="modalTitle" style="font-size: 1.8rem; font-weight: 900;"></h2>
+                <div id="modalPrice" style="font-size: 1.5rem; font-weight: 800; color: var(--logo-accent); margin: 0.4rem 0;"></div>
+                <p id="modalDesc" style="color: var(--subtext-color); font-size: 0.85rem; line-height: 1.6;"></p>
+                
+                <div style="margin-top: 1rem;">
+                    <span style="font-size: 0.75rem; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700;">Select Size</span>
+                    <div class="size-grid">
+                        <button class="size-btn active">UK 5</button>
+                        <button class="size-btn">UK 6</button>
+                        <button class="size-btn">UK 7</button>
+                        <button class="size-btn">UK 8</button>
+                        <button class="size-btn">UK 9</button>
+                        <button class="size-btn">UK 10</button>
+                    </div>
+                </div>
+
+                <button class="pay-btn" onclick="alert('Payments launching soon!')">Pay Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const shoesData = [
+            // ==================== MEN'S SHOES (10) ====================
+            { id: 1, name: "WDWT Stealth Runner", category: "men", price: 6499, bestseller: true, desc: "Matte-black dynamic street runners with cushioned shock absorption.", angles: ["https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"] },
+            { id: 2, name: "WDWT Cyber Pulse", category: "men", price: 8299, bestseller: true, desc: "High-top performance sneaker with technical layered upper mesh.", angles: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"] },
+            { id: 3, name: "WDWT Shadow Low", category: "men", price: 3899, bestseller: false, desc: "Minimalist low-top leather sneakers with sleek profile.", angles: ["https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"] },
+            { id: 4, name: "WDWT Phantom Drift", category: "men", price: 7499, bestseller: false, desc: "Lightweight urban speed trainers built for heavy mobility.", angles: ["https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"] },
+            { id: 5, name: "WDWT Nocturne 01", category: "men", price: 4999, bestseller: false, desc: "Casual street sneakers engineered for subtle movement.", angles: ["https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"] },
+            { id: 6, name: "WDWT Echo High", category: "men", price: 8999, bestseller: true, desc: "Textured high-top sneaker with reinforced silent ankle support.", angles: ["https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80"] },
+            { id: 7, name: "WDWT Monolith", category: "men", price: 5799, bestseller: false, desc: "Heavy-duty urban boots made from weather-treated leather.", angles: ["https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"] },
+            { id: 8, name: "WDWT Carbon V", category: "men", price: 3499, bestseller: false, desc: "Breathable mesh daily wear sneakers crafted with carbon accents.", angles: ["https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"] },
+            { id: 9, name: "WDWT Eclipse", category: "men", price: 7899, bestseller: false, desc: "Dark reflective dynamic paneling for modern night wear.", angles: ["https://images.unsplash.com/photo-1575537302964-96cd47c06b1b?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"] },
+            { id: 10, name: "WDWT Apex Pro", category: "men", price: 8699, bestseller: false, desc: "Precision engineered performance shoes for maximum comfort.", angles: ["https://images.unsplash.com/photo-1582588678413-dbf45f4823e9?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80", "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"] },
+
+            // ==================== WOMEN'S SHOES (10) ====================
+            { 
+                id: 11, name: "WDWT Aero Aura", category: "women", price: 6899, bestseller: true, 
+                desc: "Sculpted chunky women's platform sneakers with soft pastel lines.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1588117305388-c2631a279f82?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1581101767113-1677fc2beaa8?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1562183241-b937e95585b6?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 12, name: "WDWT Velvet Haze", category: "women", price: 4299, bestseller: false, 
+                desc: "Soft textured suede street sneakers in muted aesthetic tones.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1588117305388-c2631a279f82?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1581101767113-1677fc2beaa8?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1562183241-b937e95585b6?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 13, name: "WDWT Nova Strider", category: "women", price: 7999, bestseller: true, 
+                desc: "High-fashion platform trainers with clear liquid glass soles.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1588117305388-c2631a279f82?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1581101767113-1677fc2beaa8?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1562183241-b937e95585b6?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 14, name: "WDWT Prism Low", category: "women", price: 3299, bestseller: false, 
+                desc: "White low-tops detailed with an iridescent heel clip.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1581101767113-1677fc2beaa8?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1588117305388-c2631a279f82?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1562183241-b937e95585b6?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 15, name: "WDWT Mirage Slip", category: "women", price: 5499, bestseller: false, 
+                desc: "Flexible slip-on runners crafted for effortless mobility.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1562183241-b937e95585b6?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1588117305388-c2631a279f82?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1581101767113-1677fc2beaa8?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 16, name: "WDWT Solar Luxe", category: "women", price: 8499, bestseller: false, 
+                desc: "Luxury women's trainers with elevated platform cushioning.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1588117305388-c2631a279f82?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1562183241-b937e95585b6?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 17, name: "WDWT Zenith Knit", category: "women", price: 4699, bestseller: false, 
+                desc: "Minimalist modern knit sneakers with breathable upper.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1588117305388-c2631a279f82?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1562183241-b937e95585b6?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 18, name: "WDWT Silk Satin", category: "women", price: 8999, bestseller: true, 
+                desc: "Premium lifestyle footwear styled with satin trim overlays.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1588117305388-c2631a279f82?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1562183241-b937e95585b6?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 19, name: "WDWT Breeze Walk", category: "women", price: 3199, bestseller: false, 
+                desc: "Ultra-light summer walkwear designed for maximum air flow.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1588117305388-c2631a279f82?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1562183241-b937e95585b6?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 20, name: "WDWT Kinesis Studio", category: "women", price: 6299, bestseller: false, 
+                desc: "Studio trainers delivering ergonomic daily balance.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1562183241-b937e95585b6?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1543163521-1bf539c55dd2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1588117305388-c2631a279f82?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1512374382149-233c42b6a83b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+
+            // ==================== UNISEX SHOES (10) - ZERO ON-FOOT SHOTS & SINGLE PAIRS ONLY ====================
+            { 
+                id: 21, name: "WDWT Universal Silence", category: "unisex", price: 7299, bestseller: true, 
+                desc: "Gender-neutral signature design built on liquid glass arch tech.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 22, name: "WDWT Flux Core", category: "unisex", price: 5899, bestseller: false, 
+                desc: "Adaptable street footwear engineered for everyday wear.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 23, name: "WDWT Quantum Low", category: "unisex", price: 3999, bestseller: false, 
+                desc: "Low-profile court shoes with responsive foam.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 24, name: "WDWT Pulse X", category: "unisex", price: 8799, bestseller: true, 
+                desc: "Statement sneakers featuring translucent outsole pods.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 25, name: "WDWT Void Mesh", category: "unisex", price: 6199, bestseller: false, 
+                desc: "Triple-black lightweight trainers with moisture-wicking weave.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 26, name: "WDWT Pure White", category: "unisex", price: 3599, bestseller: false, 
+                desc: "Classic crisp white leather shoes designed for minimalist styling.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 27, name: "WDWT Matrix Boot", category: "unisex", price: 8499, bestseller: false, 
+                desc: "Futuristic street boots with quick-lacing mechanism.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 28, name: "WDWT Tactical Tech", category: "unisex", price: 6999, bestseller: false, 
+                desc: "Multi-layered techwear sneakers fitted with nylon buckles.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1575537302964-96cd47c06b1b?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 29, name: "WDWT Shift City", category: "unisex", price: 4799, bestseller: false, 
+                desc: "Soft foam low-top sneakers for daily commuting.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"
+                ] 
+            },
+            { 
+                id: 30, name: "WDWT Horizon Sole", category: "unisex", price: 7699, bestseller: false, 
+                desc: "Gradient-soled lifestyle runners.", 
+                angles: [
+                    "https://images.unsplash.com/photo-1582588678413-dbf45f4823e9?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80",
+                    "https://images.unsplash.com/photo-1515955656352-a1fa3ffcd111?auto=format&fit=crop&w=800&q=80"
+                ] 
+            }
+        ];
+
+        let currentCategory = 'all';
+        let currentSort = 'bestseller';
+
+        function renderProductsWithAnimation() {
+            const grid = document.getElementById('productsGrid');
+            grid.classList.add('grid-animating');
+
+            setTimeout(() => {
+                grid.innerHTML = '';
+
+                let filtered = shoesData.filter(s => currentCategory === 'all' || s.category === currentCategory);
+
+                if (currentSort === 'low-high') filtered.sort((a, b) => a.price - b.price);
+                else if (currentSort === 'high-low') filtered.sort((a, b) => b.price - a.price);
+                else if (currentSort === 'bestseller') filtered.sort((a, b) => (b.bestseller === a.bestseller) ? 0 : b.bestseller ? 1 : -1);
+
+                filtered.forEach(shoe => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.onclick = () => openModal(shoe.id);
+
+                    card.innerHTML = `
+                        <div class="product-image-box">
+                            ${shoe.bestseller ? '<span class="badge-bestseller">Best Seller</span>' : ''}
+                            <img src="${shoe.angles[0]}" alt="${shoe.name}">
+                        </div>
+                        <div class="product-info">
+                            <div class="product-category">${shoe.category}</div>
+                            <div class="product-title">${shoe.name}</div>
+                            <div class="product-price">₹${shoe.price.toLocaleString('en-IN')}</div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+
+                grid.classList.remove('grid-animating');
+            }, 300);
+        }
+
+        function filterCategory(cat, btn) {
+            currentCategory = cat;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            renderProductsWithAnimation();
+        }
+
+        function sortProducts(sortVal) {
+            currentSort = sortVal;
+            renderProductsWithAnimation();
+        }
+
+        function openModal(id) {
+            const shoe = shoesData.find(s => s.id === id);
+            if (!shoe) return;
+
+            document.getElementById('modalTitle').innerText = shoe.name;
+            document.getElementById('modalPrice').innerText = `₹${shoe.price.toLocaleString('en-IN')}`;
+            document.getElementById('modalDesc').innerText = shoe.desc;
+
+            const mainImg = document.getElementById('modalMainImg');
+            mainImg.src = shoe.angles[0];
+
+            const thumbsContainer = document.getElementById('modalThumbs');
+            thumbsContainer.innerHTML = '';
+
+            shoe.angles.forEach((imgUrl, index) => {
+                const img = document.createElement('img');
+                img.src = imgUrl;
+                img.className = `thumb-img ${index === 0 ? 'active' : ''}`;
+                img.onclick = () => {
+                    mainImg.src = imgUrl;
+                    document.querySelectorAll('.thumb-img').forEach(t => t.classList.remove('active'));
+                    img.classList.add('active');
+                };
+                thumbsContainer.appendChild(img);
+            });
+
+            document.getElementById('productModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('productModal').classList.remove('active');
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            const catParam = params.get('category');
+            if (catParam) {
+                currentCategory = catParam;
+                const activeBtn = Array.from(document.querySelectorAll('.filter-btn')).find(b => b.textContent.toLowerCase().includes(catParam));
+                if (activeBtn) {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    activeBtn.classList.add('active');
+                }
+            }
+            renderProductsWithAnimation();
+        });
+    </script>
+</body>
+</html>
